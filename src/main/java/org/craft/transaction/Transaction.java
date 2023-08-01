@@ -11,6 +11,8 @@ import org.craft.price.PriceIndex;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class Transaction {
@@ -20,19 +22,23 @@ public class Transaction {
     private PriceIndex priceIndex;
     private Optional<CostBreakdown> breakdown;
 
+    List<Optional<RentalAgreement>> transactionsResult;
+
     public Transaction(Inventory inventory, BufferedReader reader, PriceIndex index) {
         this.inventory = inventory;
         this.reader = reader;
         this.priceIndex = index;
+        this.transactionsResult = new ArrayList<>();
     }
 
     public Transaction(Inventory inventory, TransactionInput input, PriceIndex index){
         this.inventory = inventory;
         this.input = input;
         this.priceIndex = index;
+        this.transactionsResult = new ArrayList<>();
     }
-    public RentalAgreement process() {
-        RentalAgreement agreement = null;
+    public List<Optional<RentalAgreement>> process() {
+        RentalAgreement agreement;
         try {
             if(this.reader != null && this.reader.ready()){
                 String entry;
@@ -49,7 +55,7 @@ public class Transaction {
                                             .map(str -> str.substring(0, str.length() - 1))
                                             .orElse(entryByComponents[3])));
                     Transaction entryTransaction = new Transaction(this.inventory, transactionInput, this.priceIndex);
-                    entryTransaction.process();
+                    this.transactionsResult.addAll(entryTransaction.process());
                 }
             } else
                 if(this.input != null){
@@ -73,7 +79,7 @@ public class Transaction {
                                         this.priceIndex.getPrice(this.input.toolCode()).get(),
                                         this.breakdown.get(),
                                         this.input.discount());
-                        System.out.println(agreement);
+                        transactionsResult.add(Optional.of(agreement));
                 } else throw new NoInventoryFoundException();
             } else System.out.println("No transactions to process");
         } catch (IOException e){
@@ -83,6 +89,6 @@ public class Transaction {
         } catch (InvalidTransaction e){
             System.out.println(e.getMessage());
         }
-        return agreement;
+        return transactionsResult;
     }
 }

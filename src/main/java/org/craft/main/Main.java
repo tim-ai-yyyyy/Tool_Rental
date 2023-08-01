@@ -9,6 +9,7 @@ import org.craft.util.InputsUtil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 public class Main {
@@ -24,7 +25,11 @@ public class Main {
             inventory = new Inventory(inventoryReader.get());
             index = new PriceIndex(priceIndexReader.get());
             transaction = new Transaction(inventory, transactionReader.get(), index);
-            transaction.process();
+            List<Optional<RentalAgreement>> agreements = transaction.process();
+            System.out.println(agreements.size());
+            agreements.forEach(agreement -> {
+                System.out.println(agreement.get().toString());
+            });
         }
     }
 }

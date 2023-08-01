@@ -30,38 +30,43 @@ public class PriceIndex {
     }
 
     public Optional<Double> getPrice(String toolCode){
-        String toolType = convertKey(toolCode);
-        if(this.price_index.containsKey(toolType)) {
-            return Optional.of(this.price_index.get(toolType).charge());
-        }
-        return Optional.empty();
+        if(convertKey(toolCode).isPresent()){
+            String toolType = convertKey(toolCode).get();
+            if(this.price_index.containsKey(toolType)) {
+                return Optional.of(this.price_index.get(toolType).charge());
+            }
+            return Optional.empty();
+        } else return Optional.empty();
     }
 
     public Optional<Boolean> getWeekdayCharge(String toolCode){
-        String toolType = convertKey(toolCode);
-        if(this.price_index.containsKey(toolType)){
-            return Optional.of(this.price_index.get(toolType).weekday());
-        }
-        return Optional.empty();
+        if(convertKey(toolCode).isPresent()) {
+            String toolType = convertKey(toolCode).get();
+            if (this.price_index.containsKey(toolType)) {
+                return Optional.of(this.price_index.get(toolType).weekday());
+            } else return Optional.empty();
+        } else return Optional.empty();
     }
 
     public Optional<Boolean> getWeekendCharge(String toolCode){
-        String toolType = convertKey(toolCode);
-        if(this.price_index.containsKey(toolType)){
-            return Optional.of(this.price_index.get(toolType).weekend());
-        }
-        return Optional.empty();
+        if(convertKey(toolCode).isPresent()){
+            String toolType = convertKey(toolCode).get();
+            if(this.price_index.containsKey(toolType)){
+                return Optional.of(this.price_index.get(toolType).weekend());
+            } else return Optional.empty();
+        } else return Optional.empty();
     }
 
     public Optional<Boolean> getHolidayCharge(String toolCode){
-        String toolType = convertKey(toolCode);
-        if(this.price_index.containsKey(toolType)){
-            return Optional.of(this.price_index.get(toolType).holiday());
-        }
-        return Optional.empty();
+        if(convertKey(toolCode).isPresent()){
+            String toolType = convertKey(toolCode).get();
+            if(this.price_index.containsKey(toolType)){
+                return Optional.of(this.price_index.get(toolType).holiday());
+            } else return Optional.empty();
+        } else return Optional.empty();
     }
 
-    private String convertKey(String toolCode){
+    private Optional<String> convertKey(String toolCode){
         String toolType;
         try {
             switch (toolCode){
@@ -78,12 +83,12 @@ public class PriceIndex {
                     toolType = "Chainsaw";
                     break;
                 default:
-                    throw new NoInventoryFoundException();
-            }
-        } catch (NoInventoryFoundException e) {
-            throw new RuntimeException(e);
-        }
-        return toolType;
+                    toolType = null;
+                }
+        } finally {}
+        if(toolType != null){
+            return Optional.of(toolType);
+        } else return Optional.empty();
     }
 
     public Map<String, Charge> getIndex(){

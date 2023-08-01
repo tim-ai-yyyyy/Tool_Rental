@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,31 +22,35 @@ import static org.mockito.Mockito.*;
 
 public class InventoryTest {
 
-    @Mock
-    private
-    BufferedReader mockReader;
+    Inventory inventory;
+    Tool testTool;
+    String testCode = "testCode", testType = "testType", testBrand = "testBrand";
 
-    private Map<String, Tool> testMap;
 
-    private Inventory inventory;
+    @BeforeEach
+    public void init() throws IOException {
+        testTool = new Tool(testCode, testType, testBrand);
+        String testToolString = testCode + " " + testType + " " + testBrand;
+
+        BufferedReader mockReader = mock(BufferedReader.class);
+        when(mockReader.readLine()).thenReturn(testToolString, null);
+        inventory = new Inventory(mockReader);
+
+    }
 
     @Test
-    public void test_Constructor(){
-        try {
-            String testCode = "testCode", testType = "testType", testBrand = "testBrand";
-            Tool testTool = new Tool(testCode, testType, testBrand);
-            String testToolString = testCode + " " + testType + " " + testBrand;
-            mockReader = mock(BufferedReader.class);
-            testMap = new HashMap<>();
-            testMap.put(testCode, testTool);
-            inventory = new Inventory(mockReader);
-            doReturn(testToolString).when(mockReader).readLine();
-            Optional<Tool> result = inventory.checkInventory(testCode);
-            if(result.isPresent()) {
-                Assertions.assertEquals(result.get(), testTool);
-            }
-        } catch ( IOException e ){
-            e.printStackTrace();
+    public void test_CheckInventory_ReturnTool(){
+        Optional<Tool> result = inventory.checkInventory(testCode);
+        if(result.isPresent()) {
+            Assertions.assertEquals(result.get(), testTool);
+        } else fail();
+    }
+
+    @Test
+    public void test_CheckInventory_ReturnEmpty(){
+        Optional<Tool> result = inventory.checkInventory("empty");
+        if(result.isPresent()) {
+            fail();
         }
     }
 }
